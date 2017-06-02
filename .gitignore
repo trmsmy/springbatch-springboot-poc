@@ -1,9 +1,9 @@
 .classpath
 .project
 .settings/
-target/
+target/*
 /*.tlog
-.gradle
+.gradle/*
 build/
 
 # Ignore Gradle GUI config
