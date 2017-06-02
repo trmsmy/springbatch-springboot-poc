@@ -13,12 +13,8 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.PassThroughLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,9 +32,9 @@ import com.trmsmy.spring.boot.batch.springbootbatch.MultiLineRecordItemProcessor
 import com.trmsmy.spring.boot.batch.springbootbatch.MultiLineTradeItemReader;
 import com.trmsmy.spring.boot.batch.springbootbatch.StepExecutionNotificationListener;
 
-@Configuration
-@EnableBatchProcessing
-@ComponentScan(basePackages = "com.trmsmy.spring.boot.batch.springbootbatch")
+//@Configuration
+//@EnableBatchProcessing
+//@ComponentScan(basePackages = "com.trmsmy.spring.boot.batch.springbootbatch")
 public class BatchConfiguration {
 
 	@Autowired
