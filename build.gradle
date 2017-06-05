@@ -26,7 +26,8 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-batch')
 	compile('org.springframework.boot:spring-boot-starter-integration')
 	compile('org.springframework.integration:spring-integration-jms:4.3.9.RELEASE')
-	
+	compile("org.springframework.batch:spring-batch-integration:3.0.7.RELEASE")
+	compile("io.hawt:hawtio-springboot:1.4.38" )
 	
 	runtime('org.hsqldb:hsqldb')
 	compile('commons-dbcp:commons-dbcp:1.4')

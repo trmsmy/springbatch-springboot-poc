@@ -1,54 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:batch="http://www.springframework.org/schema/batch"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:batch="http://www.springframework.org/schema/batch" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
 		 http://www.springframework.org/schema/beans/spring-beans.xsd
 		 http://www.springframework.org/schema/batch
 		 http://www.springframework.org/schema/batch/spring-batch.xsd">
 
-	<batch:job id="imageProcessingJob">
+	<batch:job id="masterJob">
 		<batch:listeners>
-			<batch:listener ref="jobListener"/>
+			<batch:listener ref="jobListener" />
 		</batch:listeners>
 		<batch:step id="cleanup" next="processImages.master">
-			<batch:tasklet ref="cleanupTasklet"/>
+			<batch:tasklet ref="cleanupTasklet" />
 		</batch:step>
 		<batch:step id="processImages.master">
-			<batch:partition partitioner="partitioner" handler="partitionHandler"/>
+			<batch:partition partitioner="partitioner" handler="partitionHandler" />
 		</batch:step>
 	</batch:job>
 
-	<batch:step id="processImages">
+	<batch:step id="processFile">
 		<batch:tasklet>
-			<bean class="io.spring.remotepartitioningmaster.tasklet.NoopTasklet"/>
+			<batch:chunk reader="itemReader" processor="itemProcessor"
+				writer="itemWriter" commit-interval="100">
+				<!-- <batch:listeners>
+					<batch:listener ref="inputFileProxy"></batch:listener>
+				</batch:listeners> -->
+			</batch:chunk>
 		</batch:tasklet>
 	</batch:step>
+<!-- 
+	<bean id="inputFileProxy"
+		class="org.springframework.batch.core.resource.StepExecutionResourceProxy">
+		<property name="filePattern" value="%filePath%" />
+	</bean> -->
 
-	<batch:job-repository/>
+	<bean id="itemReader"
+		class="com.trmsmy.spring.boot.batch.springbootbatch.MultiLineTradeItemReader" scope="step">
+		<property name="delegate">
+			<bean class="org.springframework.batch.item.file.FlatFileItemReader">
+				<property name="resource" value="#{stepExecutionContext[filePath]}" />
+				<property name="lineMapper">
+					<bean
+						class="org.springframework.batch.item.file.mapping.PassThroughLineMapper" />
+				</property>
+			</bean>
+		</property>
 
-	<bean id="cleanupTasklet" class="com.trmsmy.spring.boot.batch.springbootbatch.partition.CleanupTasklet">
-		<constructor-arg value="${processed.images.dir}"/>
 	</bean>
 
-	<bean id="jobListener" class="com.trmsmy.spring.boot.batch.springbootbatch.partition.JobDurationListener"/>
+	<bean id="itemProcessor"
+		class="com.trmsmy.spring.boot.batch.springbootbatch.MultiLineRecordItemProcessor" />
 
-	<bean id="jobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
-		<property name="jobRepository" ref="jobRepository"/>
+	<bean id="itemWriter" class="org.springframework.batch.item.file.FlatFileItemWriter" scope="step">
+		<property name="resource" value="file://home/trmsmy/workspace/java/springboot-batch/target/processed/output_#{stepExecutionContext[fileName]}" />
+		<property name="lineAggregator">
+			<bean
+				class="org.springframework.batch.item.file.transform.PassThroughLineAggregator" />
+		</property>
 	</bean>
 
-	<bean id="partitioner" class="com.trmsmy.spring.boot.batch.springbootbatch.partition.FilePartitioner">
-		<constructor-arg index="0" ref="${input.dir}"/>
+	<batch:job-repository />
+
+	<bean id="cleanupTasklet"
+		class="com.trmsmy.spring.boot.batch.springbootbatch.partition.CleanupTasklet">
+		<constructor-arg value="${processed.dir}" />
 	</bean>
 
-	<bean id="partitionHandler" class="org.springframework.batch.integration.partition.MessageChannelPartitionHandler">
-		<property name="stepName" value="processImages"/>
-		<property name="gridSize" value="5"/>
-		<property name="replyChannel" ref="aggregatedReplyChannel"/>
+	<bean id="jobListener"
+		class="com.trmsmy.spring.boot.batch.springbootbatch.partition.JobDurationListener" />
+
+	<bean id="jobLauncher"
+		class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="jobRepository" />
+	</bean>
+
+	<bean id="partitioner"
+		class="com.trmsmy.spring.boot.batch.springbootbatch.partition.FilePartitioner">
+		<constructor-arg index="0" value="${input.dir}" />
+	</bean>
+
+	<bean id="stepExecutionRequestHandler"
+		class="org.springframework.batch.integration.partition.StepExecutionRequestHandler">
+		<property name="jobExplorer" ref="jobExplorer" />
+		<property name="stepLocator" ref="stepLocator" />
+	</bean>
+
+	<bean id="jobExplorer"
+		class="org.springframework.batch.core.explore.support.JobExplorerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="stepLocator"
+		class="org.springframework.batch.integration.partition.BeanFactoryStepLocator" />
+
+	<bean id="partitionHandler"
+		class="org.springframework.batch.integration.partition.MessageChannelPartitionHandler">
+		<property name="stepName" value="processFile" />
+		<property name="gridSize" value="5" />
+		<property name="replyChannel" ref="aggregatedReplyChannel" />
 		<property name="messagingOperations">
 			<bean class="org.springframework.integration.core.MessagingTemplate">
-				<property name="defaultChannel" ref="requestsChannel"/>
+				<property name="defaultChannel" ref="requestsChannel" />
 			</bean>
 		</property>
 	</bean>

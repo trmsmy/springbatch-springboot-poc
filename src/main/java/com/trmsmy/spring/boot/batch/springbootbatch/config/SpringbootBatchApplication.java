@@ -11,6 +11,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
@@ -21,6 +22,9 @@ public class SpringbootBatchApplication {
 	private static final String CONFIG = "/META-INF/spring/config/job-context.xml";
 
 	public static void main(String[] args) throws Exception {
+		
+		System.setProperty("hawtio.authenticationEnabled", "false");
+		
 		SpringApplication.run(SpringbootBatchApplication.class, args);
 
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(CONFIG);
