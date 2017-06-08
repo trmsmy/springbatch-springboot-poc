@@ -11,10 +11,10 @@
 		<batch:listeners>
 			<batch:listener ref="jobListener" />
 		</batch:listeners>
-		<batch:step id="cleanup" next="processImages.master">
+		<batch:step id="cleanup" next="fileProcessing.master">
 			<batch:tasklet ref="cleanupTasklet" />
 		</batch:step>
-		<batch:step id="processImages.master">
+		<batch:step id="fileProcessing.master">
 			<batch:partition partitioner="partitioner" handler="partitionHandler" />
 		</batch:step>
 	</batch:job>

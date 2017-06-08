@@ -8,7 +8,7 @@
 		 http://www.springframework.org/schema/context
 		 http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<context:property-placeholder location="classpath:/META-INF/spring/config/application.properties"/>
+	<context:property-placeholder location="classpath:spring/config/application.properties"/>
 
 	<import resource="datasource-beans.xml"/>
 	<import resource="jms.xml"/>
